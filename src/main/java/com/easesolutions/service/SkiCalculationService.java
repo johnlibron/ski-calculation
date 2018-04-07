@@ -2,6 +2,6 @@ package com.easesolutions.service;
 
 public interface SkiCalculationService {
 	
-	public String getCalculation();
+	public void getCalculation();
 	
 }
