@@ -11,4 +11,13 @@
 	<body>
 		<h1>Hello, World!</h1>
 	</body>
+	<script src='${pageContext.request.contextPath}/lib/jquery-2.2.4.min.js'/></script>
+	<script type="text/javascript">
+		$.ajax({
+			url: "${pageContext.request.contextPath}/api/ski-calculation",
+			type: "GET"
+		}).done(function(response) {
+			
+		});
+	</script>
 </html>
