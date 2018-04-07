@@ -49,6 +49,8 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		TreeNode<Integer> root = new TreeNode<Integer>(max);
 		
 		traverse(map, root, max, rowIndex, colIndex);
+		
+		System.out.println("Length of calculated path: " + getHeight(root));
 	}
 	
 	private boolean traverse(int[][] map, TreeNode<Integer> root, int startPoint, int row, int col) {
@@ -88,5 +90,16 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	
 	private boolean isLessThanStartPoint(int[][] map, int startPoint, int row, int col) {
 		return map[row][col] > Constant.ZERO && map[row][col] < startPoint;
+	}
+	
+	private int getHeight(TreeNode<Integer> node) {
+		if (null == node) {
+			return 0;
+		}
+		int max = 0;
+		for (TreeNode<Integer> child : node.getChildren()) {
+			max = Math.max(getHeight(child), max);
+		}
+		return max + 1;
 	}
 }
