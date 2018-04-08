@@ -1,21 +1,42 @@
 package com.easesolutions.model;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class TreeNode<T> {
 	private T data;
 	private TreeNode<T> parent;
-	private List<TreeNode<T>> children;
+	private TreeNode<T> north;
+	private TreeNode<T> south;
+	private TreeNode<T> east;
+	private TreeNode<T> west;
 	public TreeNode(T data) {
 		this.data = data;
 		this.parent = null;
-		this.children = new LinkedList<TreeNode<T>>();
+		this.north = null;
+		this.south = null;
+		this.east = null;
+		this.west = null;
 	}
-	public TreeNode<T> addChild(T child) {
+	public TreeNode<T> addNorthChild(T child) {
 		TreeNode<T> childNode = new TreeNode<T>(child);
 		childNode.parent = this;
-		this.children.add(childNode);
+		this.north = childNode;
+		return childNode;
+	}
+	public TreeNode<T> addSouthChild(T child) {
+		TreeNode<T> childNode = new TreeNode<T>(child);
+		childNode.parent = this;
+		this.south = childNode;
+		return childNode;
+	}
+	public TreeNode<T> addEastChild(T child) {
+		TreeNode<T> childNode = new TreeNode<T>(child);
+		childNode.parent = this;
+		this.east = childNode;
+		return childNode;
+	}
+	public TreeNode<T> addWestChild(T child) {
+		TreeNode<T> childNode = new TreeNode<T>(child);
+		childNode.parent = this;
+		this.west = childNode;
 		return childNode;
 	}
 	public T getData() {
@@ -30,23 +51,28 @@ public class TreeNode<T> {
 	public void setParent(TreeNode<T> parent) {
 		this.parent = parent;
 	}
-	public List<TreeNode<T>> getChildren() {
-		return children;
+	public TreeNode<T> getNorth() {
+		return north;
 	}
-	public void setChildren(List<TreeNode<T>> children) {
-		this.children = children;
+	public void setNorth(TreeNode<T> north) {
+		this.north = north;
 	}
-	public boolean isRoot() {
-		return parent == null;
+	public TreeNode<T> getSouth() {
+		return south;
 	}
-	public boolean isLeaf() {
-		return children.size() == 0;
+	public void setSouth(TreeNode<T> south) {
+		this.south = south;
 	}
-	public int getLevel() {
-		if (this.isRoot()) {
-			return 0;
-		} else {
-			return parent.getLevel() + 1;
-		}	
+	public TreeNode<T> getEast() {
+		return east;
+	}
+	public void setEast(TreeNode<T> east) {
+		this.east = east;
+	}
+	public TreeNode<T> getWest() {
+		return west;
+	}
+	public void setWest(TreeNode<T> west) {
+		this.west = west;
 	}
 }

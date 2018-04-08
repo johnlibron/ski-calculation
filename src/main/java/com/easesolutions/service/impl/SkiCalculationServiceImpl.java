@@ -49,8 +49,6 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		TreeNode<Integer> root = new TreeNode<Integer>(max);
 		
 		traverse(map, root, max, rowIndex, colIndex);
-		
-		System.out.println("Length of calculated path: " + getHeight(root));
 	}
 	
 	private boolean traverse(int[][] map, TreeNode<Integer> root, int startPoint, int row, int col) {
@@ -64,10 +62,10 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 			proceed = isNorth || isSouth || isEast || isWest;
 			
 			while (proceed) {
-				proceed = addChild(isNorth, root, map, row-1, col);
-				proceed = addChild(isSouth, root, map, row+1, col);
-				proceed = addChild(isEast, root, map, row, col+1);
-				proceed = addChild(isWest, root, map, row, col-1);
+				proceed = addChild(isNorth, root, map, row-1, col, Constant.POSITION.NORTH);
+				proceed = addChild(isSouth, root, map, row+1, col, Constant.POSITION.SOUTH);
+				proceed = addChild(isEast, root, map, row, col+1, Constant.POSITION.EAST);
+				proceed = addChild(isWest, root, map, row, col-1, Constant.POSITION.WEST);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -75,10 +73,24 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		return proceed;
 	}
 
-	private boolean addChild(boolean direction, TreeNode<Integer> root, int[][] map, int row, int col) {
+	private boolean addChild(boolean direction, TreeNode<Integer> root, int[][] map, int row, int col, int position) {
 		boolean isAdd = false;
 		if (direction) {
-			TreeNode<Integer> node = root.addChild(map[row][col]);
+			TreeNode<Integer> node = null;
+			switch (position) {
+				case 1:
+					node = root.addNorthChild(map[row][col]);
+					break;
+				case 2:
+					node = root.addSouthChild(map[row][col]);
+					break;
+				case 3:
+					node = root.addEastChild(map[row][col]);
+					break;
+				case 4:
+					node = root.addWestChild(map[row][col]);
+					break;
+			}
 			isAdd = traverse(map, node, map[row][col], row, col);
 		}
 		return isAdd;
@@ -90,16 +102,5 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	
 	private boolean isLessThanStartPoint(int[][] map, int startPoint, int row, int col) {
 		return map[row][col] > Constant.ZERO && map[row][col] < startPoint;
-	}
-	
-	private int getHeight(TreeNode<Integer> node) {
-		if (null == node) {
-			return 0;
-		}
-		int max = 0;
-		for (TreeNode<Integer> child : node.getChildren()) {
-			max = Math.max(getHeight(child), max);
-		}
-		return max + 1;
 	}
 }
