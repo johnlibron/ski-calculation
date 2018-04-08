@@ -1,5 +1,10 @@
 package com.easesolutions.service.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.easesolutions.model.TreeNode;
@@ -8,6 +13,8 @@ import com.easesolutions.util.Constant;
 
 @Service
 public class SkiCalculationServiceImpl implements SkiCalculationService {
+	
+	private List<List<Integer>> paths = new ArrayList<>();
 
 	@Override
 	public void getCalculation() {
@@ -49,6 +56,24 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		TreeNode<Integer> root = new TreeNode<Integer>(max);
 		
 		traverse(map, root, max, rowIndex, colIndex);
+		
+		getPaths(root, new ArrayList<Integer>(), 0);
+		
+		Collections.sort(paths, new Comparator<List<Integer>>() {
+			@Override
+			public int compare(List<Integer> list1, List<Integer> list2) {
+				Integer size1 = list1.size();
+				Integer size2 = list2.size();
+				return size2.compareTo(size1);
+			}
+		});
+		
+		List<Integer> path = paths.get(0);
+		
+		System.out.println();
+		System.out.println("Length of calculated path: " + path.size());
+		System.out.println("Drop of calculated path: " + (path.get(0) - path.get(path.size()-1)));		
+		System.out.println("Calculated path: " + path.toString().replace(", ", "-"));
 	}
 	
 	private boolean traverse(int[][] map, TreeNode<Integer> root, int startPoint, int row, int col) {
@@ -103,4 +128,29 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	private boolean isLessThanStartPoint(int[][] map, int startPoint, int row, int col) {
 		return map[row][col] > Constant.ZERO && map[row][col] < startPoint;
 	}
+	
+	private void getPaths(TreeNode<Integer> node, List<Integer> path, int pathLength) {
+		if (null == node) {
+			return;
+		}
+		path.add(pathLength, node.getData());
+		pathLength++;
+		if (null == node.getNorth() && null == node.getSouth() && null == node.getEast() && null == node.getWest()) {
+			printArray(path, pathLength);
+		} else {
+			getPaths(node.getNorth(), path, pathLength);
+			getPaths(node.getSouth(), path, pathLength);
+			getPaths(node.getEast(), path, pathLength);
+			getPaths(node.getWest(), path, pathLength);
+		}
+    }
+	
+	private void printArray(List<Integer> path, int pathLength) {
+		List<Integer> pathList = new ArrayList<>();
+		for (int i = 0; i < pathLength; i++) {
+			pathList.add(path.get(i));
+		}
+		paths.add(pathList);
+	}
+	
 }
