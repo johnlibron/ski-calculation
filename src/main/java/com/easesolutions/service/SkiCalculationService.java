@@ -4,6 +4,6 @@ import com.easesolutions.model.SkiModel;
 
 public interface SkiCalculationService {
 	
-	public SkiModel getCalculation();
+	public SkiModel getCalculation(int lowestPoint, int highestPoint, int rowDimension, int colDimension);
 	
 }

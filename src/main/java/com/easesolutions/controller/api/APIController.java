@@ -1,5 +1,6 @@
 package com.easesolutions.controller.api;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +22,18 @@ public class APIController {
 
 	@RequestMapping(value="/ski-calculation", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseModel<SkiModel> skiCalculation() {
+	public ResponseModel<SkiModel> skiCalculation(HttpServletRequest request) {
 		ResponseModel<SkiModel> responseModel = new ResponseModel<>();
 		int statusCode = HttpServletResponse.SC_OK;
 		String messageCode = "Success";
 		SkiModel skiModel = null;
+		int lowestPoint = Integer.parseInt(request.getParameter("lowestPoint"));
+		int highestPoint = Integer.parseInt(request.getParameter("highestPoint"));
+		int rowDimension = Integer.parseInt(request.getParameter("rowDimension"));
+		int colDimention = Integer.parseInt(request.getParameter("colDimention"));
 		
 		try {
-			skiModel = skiCalculationService.getCalculation();
+			skiModel = skiCalculationService.getCalculation(lowestPoint, highestPoint, rowDimension, colDimention);
 		} catch (CustomException e) {
 			statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 			messageCode = "ERROR";
