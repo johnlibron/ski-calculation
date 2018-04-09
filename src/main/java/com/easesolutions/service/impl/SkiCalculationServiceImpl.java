@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.easesolutions.model.MapModel;
+import com.easesolutions.model.SkiModel;
 import com.easesolutions.model.TreeNode;
 import com.easesolutions.service.SkiCalculationService;
 import com.easesolutions.util.Constant;
@@ -17,7 +19,7 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	private List<List<Integer>> paths = new ArrayList<>();
 
 	@Override
-	public void getCalculation() {
+	public SkiModel getCalculation() {
 		
 		int[][] map = new int[][]{
 			{ 4, 8, 7, 3 },
@@ -26,38 +28,13 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 			{ 4, 4, 1, 6 }
 		};
 		
-		int max = 0;
-		int rowIndex = 0;
-		int colIndex = 0;
+		MapModel mapModel = getStartPoint(map);
 		
-		for (int row = 0; row < map.length; row++) {
-			System.out.print(row + " | ");
-			for (int col = 0; col < map[row].length; col++) {
-				System.out.print(map[row][col] + " ");
-			}
-			System.out.println();
-		}
+		TreeNode<Integer> root = new TreeNode<Integer>(mapModel.getNumber());
 		
-		for (int row = 0; row < map.length; row++) {
-			for (int col = 0; col < map[row].length; col++) {
-				if (max < map[row][col]) {
-					max = map[row][col];
-					rowIndex = row;
-					colIndex = col;
-				}
-			}
-		}
+		traverse(map, root, mapModel.getNumber(), mapModel.getRow(), mapModel.getCol());
 		
-		System.out.println();
-		System.out.println("max: " + max);
-		System.out.println("rowIndex: " + rowIndex);
-		System.out.println("colIndex: " + colIndex);
-		
-		TreeNode<Integer> root = new TreeNode<Integer>(max);
-		
-		traverse(map, root, max, rowIndex, colIndex);
-		
-		getPaths(root, new ArrayList<Integer>(), 0);
+		getPossiblePaths(root, new ArrayList<Integer>(), 0);
 		
 		Collections.sort(paths, new Comparator<List<Integer>>() {
 			@Override
@@ -70,10 +47,29 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		
 		List<Integer> path = paths.get(0);
 		
-		System.out.println();
-		System.out.println("Length of calculated path: " + path.size());
-		System.out.println("Drop of calculated path: " + (path.get(0) - path.get(path.size()-1)));		
-		System.out.println("Calculated path: " + path.toString().replace(", ", "-"));
+		SkiModel skiModel = new SkiModel();
+		skiModel.setPath(path);
+		skiModel.setLengthPath(path.size());
+		skiModel.setDropPath(path.get(0) - path.get(path.size()-1));
+		
+		return skiModel;
+	}
+	
+	private MapModel getStartPoint(int[][] map) {
+		int max = Constant.ZERO;
+		MapModel mapModel = null;
+		for (int row = 0; row < map.length; row++) {
+			for (int col = 0; col < map[row].length; col++) {
+				if (max < map[row][col]) {
+					mapModel = new MapModel();
+					mapModel.setNumber(map[row][col]);
+					mapModel.setRow(row);
+					mapModel.setCol(col);
+					max = mapModel.getNumber();
+				}
+			}
+		}
+		return mapModel;
 	}
 	
 	private boolean traverse(int[][] map, TreeNode<Integer> root, int startPoint, int row, int col) {
@@ -86,7 +82,7 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 			
 			proceed = isNorth || isSouth || isEast || isWest;
 			
-			while (proceed) {
+			if (proceed) {
 				proceed = addChild(isNorth, root, map, row-1, col, Constant.POSITION.NORTH);
 				proceed = addChild(isSouth, root, map, row+1, col, Constant.POSITION.SOUTH);
 				proceed = addChild(isEast, root, map, row, col+1, Constant.POSITION.EAST);
@@ -129,7 +125,7 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		return map[row][col] > Constant.ZERO && map[row][col] < startPoint;
 	}
 	
-	private void getPaths(TreeNode<Integer> node, List<Integer> path, int pathLength) {
+	private void getPossiblePaths(TreeNode<Integer> node, List<Integer> path, int pathLength) {
 		if (null == node) {
 			return;
 		}
@@ -138,10 +134,10 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		if (null == node.getNorth() && null == node.getSouth() && null == node.getEast() && null == node.getWest()) {
 			printArray(path, pathLength);
 		} else {
-			getPaths(node.getNorth(), path, pathLength);
-			getPaths(node.getSouth(), path, pathLength);
-			getPaths(node.getEast(), path, pathLength);
-			getPaths(node.getWest(), path, pathLength);
+			getPossiblePaths(node.getNorth(), path, pathLength);
+			getPossiblePaths(node.getSouth(), path, pathLength);
+			getPossiblePaths(node.getEast(), path, pathLength);
+			getPossiblePaths(node.getWest(), path, pathLength);
 		}
     }
 	
