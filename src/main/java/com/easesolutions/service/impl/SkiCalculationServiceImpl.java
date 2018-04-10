@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.easesolutions.model.MapModel;
+import com.easesolutions.model.PathModel;
 import com.easesolutions.model.SkiModel;
 import com.easesolutions.model.TreeNode;
 import com.easesolutions.service.SkiCalculationService;
@@ -16,7 +16,7 @@ import com.easesolutions.util.Constant;
 @Service
 public class SkiCalculationServiceImpl implements SkiCalculationService {
 	
-	private List<List<Integer>> paths;
+	private List<List<PathModel>> gbPossiblePaths;
 	private int gbLowestPoint;
 	private int gbHighestPoint;
 	private int gbRowDimension;
@@ -37,78 +37,158 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		gbRowDimension = rowDimension;
 		gbColDimension = colDimension;
 		
-		List<MapModel> getHighestTenPoints = getHighestTenPoints(map);
+		List<PathModel> highestTenPoints = getHighestTenPoints(map);
 		
+		List<SkiModel> possiblePaths = getPossiblePaths(map, highestTenPoints);
+
+		SkiModel skiModel = getCalculatedPath(possiblePaths);
+		
+		return skiModel;
+	}
+	
+	private List<PathModel> getHighestTenPoints(int[][] map) {
+		List<PathModel> highestTenPoints = new ArrayList<>();
+		PathModel pathModel = null;
+		int highestPoint = gbHighestPoint;
+		if (map.length == gbRowDimension) {
+			while (highestTenPoints.size() <= Constant.TEN) {
+				for (int row = 0; row < map.length; row++) {
+					if (map[row].length == gbColDimension) {
+						for (int col = 0; col < map[row].length; col++) {
+							if (highestPoint == map[row][col]) {
+								pathModel = new PathModel();
+								pathModel.setData(map[row][col]);
+								pathModel.setRow(row);
+								pathModel.setCol(col);
+								highestTenPoints.add(pathModel);
+							}
+						}
+					} else {
+						// throw exception
+					}
+				}
+				highestPoint--;
+			}
+		} else {
+			// throw exception
+		}
+		return highestTenPoints;
+	}
+
+	private List<SkiModel> getPossiblePaths(int[][] map, List<PathModel> getHighestTenPoints) {
 		List<SkiModel> possiblePaths = new ArrayList<>();
-		
-		for (MapModel model : getHighestTenPoints) {
-			paths = new ArrayList<>();
+		for (PathModel pathModel : getHighestTenPoints) {
+			gbPossiblePaths = new ArrayList<>();
 			
-			TreeNode<Integer> root = new TreeNode<Integer>(model.getNumber());
+			TreeNode<Integer> root = new TreeNode<Integer>(pathModel.getData());
 			
-			traverse(map, root, model.getNumber(), model.getRow(), model.getCol());
+			createPathTree(map, root, pathModel);
 			
-			getPossiblePaths(root, new ArrayList<Integer>(), 0);
+			traversePathTree(root, new ArrayList<PathModel>(), 0);
 			
-			Collections.sort(paths, new Comparator<List<Integer>>() {
+			Collections.sort(gbPossiblePaths, new Comparator<List<PathModel>>() {
 				@Override
-				public int compare(List<Integer> list1, List<Integer> list2) {
+				public int compare(List<PathModel> list1, List<PathModel> list2) {
 					Integer size1 = list1.size();
 					Integer size2 = list2.size();
 					return size2.compareTo(size1);
 				}
 			});
 			
-			List<Integer> path = paths.get(0);
+			List<Integer> pathList = new ArrayList<>();
+			List<String> axisList = new ArrayList<>();
+			
+			for (PathModel pm : gbPossiblePaths.get(0)) {
+				pathList.add(pm.getData());
+				axisList.add(pm.getAxis());
+			}
 			
 			SkiModel skiModel = new SkiModel();
-			skiModel.setPath(path);
-			skiModel.setLengthPath(path.size());
-			skiModel.setDropPath(path.get(0) - path.get(path.size()-1));
+			skiModel.setPath(pathList);
+			skiModel.setAxis(axisList);
+			skiModel.setLengthPath(pathList.size());
+			skiModel.setDropPath(pathList.get(0) - pathList.get(pathList.size()-1));
 			
 			possiblePaths.add(skiModel);
-		}		
-		
-		return possiblePaths.get(0);
+		}
+		return possiblePaths;
 	}
-	
-	private List<MapModel> getHighestTenPoints(int[][] map) {
-		List<MapModel> highestTenPoints = new ArrayList<>();
-		MapModel mapModel = null;
-		int highestPoint = gbHighestPoint;
-		while (highestTenPoints.size() != 10) {
-			for (int row = 0; row < map.length; row++) {
-				for (int col = 0; col < map[row].length; col++) {
-					if (highestPoint == map[row][col]) {
-						mapModel = new MapModel();
-						mapModel.setNumber(map[row][col]);
-						mapModel.setRow(row);
-						mapModel.setCol(col);
-						highestTenPoints.add(mapModel);
+
+	private SkiModel getCalculatedPath(List<SkiModel> possiblePaths) {
+		SkiModel path = new SkiModel();
+		for (SkiModel skiModel : possiblePaths) {
+			
+			int pathVerticalDrop = Constant.ZERO;
+			int skiModelVerticalDrop = Constant.ZERO;
+			
+			if (null == path.getPath()) {
+				path.setPath(skiModel.getPath());
+			} else {
+				for (int i = 0; i < path.getPath().size(); i++) {
+					if ((i+1) < path.getPath().size()) {
+						if (path.getAxis().get(i).equals(Constant.VERTICAL_AXIS) && path.getAxis().get(i+1).equals(Constant.VERTICAL_AXIS)) {
+							pathVerticalDrop++;
+						}
 					}
 				}
 			}
-			highestPoint--;
+			
+			if (null == path.getAxis()) {
+				path.setAxis(skiModel.getAxis());
+			} else {
+				for (int i = 0; i < skiModel.getPath().size(); i++) {
+					if ((i+1) < skiModel.getPath().size()) {
+						if (skiModel.getAxis().get(i).equals(Constant.VERTICAL_AXIS) && skiModel.getAxis().get(i+1).equals(Constant.VERTICAL_AXIS)) {
+							skiModelVerticalDrop++;
+						}
+					}
+				}
+			}
+
+			if (null != path.getPath() && null != path.getAxis()) {
+				if (skiModelVerticalDrop > pathVerticalDrop) {
+					path.setAxis(skiModel.getAxis());
+					path.setPath(skiModel.getPath());
+				}
+			}
+
+			if (null == path.getLengthPath()) {
+				path.setLengthPath(skiModel.getLengthPath());
+			} else {
+				if (skiModel.getLengthPath() > path.getLengthPath()) {
+					path.setLengthPath(skiModel.getLengthPath());
+				}
+			}
+			
+			if (null == path.getDropPath()) {
+				path.setDropPath(skiModel.getDropPath());
+			} else {
+				if (skiModel.getDropPath() > path.getDropPath()) {
+					path.setDropPath(skiModel.getDropPath());
+				}
+			}
 		}
-		
-		return highestTenPoints;
+		return path;
 	}
 	
-	private boolean traverse(int[][] map, TreeNode<Integer> root, int startPoint, int row, int col) {
+	private boolean createPathTree(int[][] map, TreeNode<Integer> root, PathModel pathModel) {
+		int startPoint = pathModel.getData();
+		int row = pathModel.getRow();
+		int col = pathModel.getCol();
 		boolean proceed = false;
 		try {
-			boolean isNorth = isInMap(row-1, col) && isLessThanStartPoint(map, startPoint, row-1, col);
-			boolean isSouth = isInMap(row+1, col) && isLessThanStartPoint(map, startPoint, row+1, col);
-			boolean isEast = isInMap(row, col+1) && isLessThanStartPoint(map, startPoint, row, col+1);
-			boolean isWest = isInMap(row, col-1) && isLessThanStartPoint(map, startPoint, row, col-1);
+			boolean isNorth = isInMap(row-1, col) && isLessThanStartPoint(map, row-1, col, startPoint);
+			boolean isSouth = isInMap(row+1, col) && isLessThanStartPoint(map, row+1, col, startPoint);
+			boolean isEast = isInMap(row, col+1) && isLessThanStartPoint(map, row, col+1, startPoint);
+			boolean isWest = isInMap(row, col-1) && isLessThanStartPoint(map, row, col-1, startPoint);
 			
 			proceed = isNorth || isSouth || isEast || isWest;
 			
 			if (proceed) {
-				proceed = addChild(isNorth, root, map, row-1, col, Constant.POSITION.NORTH);
-				proceed = addChild(isSouth, root, map, row+1, col, Constant.POSITION.SOUTH);
-				proceed = addChild(isEast, root, map, row, col+1, Constant.POSITION.EAST);
-				proceed = addChild(isWest, root, map, row, col-1, Constant.POSITION.WEST);
+				proceed = addTreeNode(isNorth, root, map, row-1, col, Constant.POSITION.NORTH);
+				proceed = addTreeNode(isSouth, root, map, row+1, col, Constant.POSITION.SOUTH);
+				proceed = addTreeNode(isEast, root, map, row, col+1, Constant.POSITION.EAST);
+				proceed = addTreeNode(isWest, root, map, row, col-1, Constant.POSITION.WEST);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -116,9 +196,9 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		return proceed;
 	}
 
-	private boolean addChild(boolean direction, TreeNode<Integer> root, int[][] map, int row, int col, int position) {
+	private boolean addTreeNode(boolean proceed, TreeNode<Integer> root, int[][] map, int row, int col, int position) {
 		boolean isAdd = false;
-		if (direction) {
+		if (proceed) {
 			TreeNode<Integer> node = null;
 			switch (position) {
 				case 1:
@@ -134,7 +214,11 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 					node = root.addWestChild(map[row][col]);
 					break;
 			}
-			isAdd = traverse(map, node, map[row][col], row, col);
+			PathModel pathModel = new PathModel();
+			pathModel.setData(map[row][col]);
+			pathModel.setRow(row);
+			pathModel.setCol(col);
+			isAdd = createPathTree(map, node, pathModel);
 		}
 		return isAdd;
 	}
@@ -143,32 +227,36 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		return row >= Constant.ZERO && row < gbRowDimension && col >= Constant.ZERO && col < gbColDimension;
 	}
 	
-	private boolean isLessThanStartPoint(int[][] map, int startPoint, int row, int col) {
+	private boolean isLessThanStartPoint(int[][] map, int row, int col, int startPoint) {
 		return map[row][col] >= gbLowestPoint && map[row][col] <= gbHighestPoint && map[row][col] < startPoint;
 	}
 	
-	private void getPossiblePaths(TreeNode<Integer> node, List<Integer> path, int pathLength) {
+	private void traversePathTree(TreeNode<Integer> node, List<PathModel> path, int pathLength) {
 		if (null == node) {
 			return;
 		}
-		path.add(pathLength, node.getData());
+		PathModel pathModel = new PathModel();
+		pathModel.setData(node.getData());
+		pathModel.setAxis(node.getAxis());
+		path.add(pathLength, pathModel);
 		pathLength++;
 		if (null == node.getNorth() && null == node.getSouth() && null == node.getEast() && null == node.getWest()) {
-			printArray(path, pathLength);
+			getPossiblePathInPathTree(path, pathLength);
 		} else {
-			getPossiblePaths(node.getNorth(), path, pathLength);
-			getPossiblePaths(node.getSouth(), path, pathLength);
-			getPossiblePaths(node.getEast(), path, pathLength);
-			getPossiblePaths(node.getWest(), path, pathLength);
+			traversePathTree(node.getNorth(), path, pathLength);
+			traversePathTree(node.getSouth(), path, pathLength);
+			traversePathTree(node.getEast(), path, pathLength);
+			traversePathTree(node.getWest(), path, pathLength);
 		}
     }
 	
-	private void printArray(List<Integer> path, int pathLength) {
-		List<Integer> pathList = new ArrayList<>();
+	private void getPossiblePathInPathTree(List<PathModel> path, int pathLength) {
+		List<PathModel> pathList = new ArrayList<>();
 		for (int i = 0; i < pathLength; i++) {
-			pathList.add(path.get(i));
+			PathModel pathModel = path.get(i);
+			pathList.add(pathModel);
 		}
-		paths.add(pathList);
+		gbPossiblePaths.add(pathList);
 	}
 	
 }

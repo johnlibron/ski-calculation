@@ -1,9 +1,11 @@
 package com.easesolutions.model;
 
+import com.easesolutions.util.Constant;
+
 public class TreeNode<T> {
 	private T data;
 	private TreeNode<T> parent;
-	private String axis; // X - horizontal, Y - vertical
+	private String axis; 
 	private TreeNode<T> north;
 	private TreeNode<T> south;
 	private TreeNode<T> east;
@@ -11,7 +13,7 @@ public class TreeNode<T> {
 	public TreeNode(T data) {
 		this.data = data;
 		this.parent = null;
-		this.axis = "Y";
+		this.axis = Constant.VERTICAL_AXIS;
 		this.north = null;
 		this.south = null;
 		this.east = null;
@@ -20,28 +22,28 @@ public class TreeNode<T> {
 	public TreeNode<T> addNorthChild(T child) {
 		TreeNode<T> childNode = new TreeNode<T>(child);
 		childNode.parent = this;
-		childNode.axis = "Y";
+		childNode.axis = Constant.VERTICAL_AXIS;
 		this.north = childNode;
 		return childNode;
 	}
 	public TreeNode<T> addSouthChild(T child) {
 		TreeNode<T> childNode = new TreeNode<T>(child);
 		childNode.parent = this;
-		childNode.axis = "Y";
+		childNode.axis = Constant.VERTICAL_AXIS;
 		this.south = childNode;
 		return childNode;
 	}
 	public TreeNode<T> addEastChild(T child) {
 		TreeNode<T> childNode = new TreeNode<T>(child);
 		childNode.parent = this;
-		childNode.axis = "X";
+		childNode.axis = Constant.HORIZONTAL_AXIS;
 		this.east = childNode;
 		return childNode;
 	}
 	public TreeNode<T> addWestChild(T child) {
 		TreeNode<T> childNode = new TreeNode<T>(child);
 		childNode.parent = this;
-		childNode.axis = "X";
+		childNode.axis = Constant.HORIZONTAL_AXIS;
 		this.west = childNode;
 		return childNode;
 	}

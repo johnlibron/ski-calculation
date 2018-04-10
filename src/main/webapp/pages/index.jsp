@@ -17,13 +17,7 @@
 	<script type="text/javascript">
 		$.ajax({
 			url: "${pageContext.request.contextPath}/api/ski-calculation",
-			type: "GET",
-			data: {
-				lowestPoint: 0,
-				highestPoint: 10,
-				rowDimension: 4,
-				colDimention: 4
-			}
+			type: "GET"
 		}).done(function(response) {
 			if (null != response.data && response.statusCode == 200) {
 				$("#lengthPath").text(response.data.lengthPath);

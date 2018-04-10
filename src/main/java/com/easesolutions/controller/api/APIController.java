@@ -27,13 +27,9 @@ public class APIController {
 		int statusCode = HttpServletResponse.SC_OK;
 		String messageCode = "Success";
 		SkiModel skiModel = null;
-		int lowestPoint = Integer.parseInt(request.getParameter("lowestPoint"));
-		int highestPoint = Integer.parseInt(request.getParameter("highestPoint"));
-		int rowDimension = Integer.parseInt(request.getParameter("rowDimension"));
-		int colDimention = Integer.parseInt(request.getParameter("colDimention"));
 		
 		try {
-			skiModel = skiCalculationService.getCalculation(lowestPoint, highestPoint, rowDimension, colDimention);
+			skiModel = skiCalculationService.getCalculation(0, 10, 4, 4);
 		} catch (CustomException e) {
 			statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 			messageCode = "ERROR";
