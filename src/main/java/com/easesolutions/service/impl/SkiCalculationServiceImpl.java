@@ -1,5 +1,8 @@
 package com.easesolutions.service.impl;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,19 +26,14 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	private int gbColDimension;
 
 	@Override
-	public SkiModel getCalculation(int lowestPoint, int highestPoint, int rowDimension, int colDimension) {
-		
-		int[][] map = new int[][]{
-			{ 4, 8, 7, 3 },
-			{ 2, 5, 9, 3 },
-			{ 6, 3, 2, 5 },
-			{ 4, 4, 1, 6 }
-		};
+	public SkiModel getCalculation(int lowestPoint, int highestPoint, int rowDimension, int colDimension) throws IOException {
 		
 		gbLowestPoint = lowestPoint;
 		gbHighestPoint = highestPoint;
 		gbRowDimension = rowDimension;
 		gbColDimension = colDimension;
+		
+		int[][] map = getMap();
 		
 		List<PathModel> highestTenPoints = getHighestTenPoints(map);
 		
@@ -46,12 +44,37 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		return skiModel;
 	}
 	
+	private int[][] getMap() throws IOException {
+		int[][] map = new int[gbRowDimension][gbColDimension];
+		FileReader fileReader = null;
+		BufferedReader bufferedReader = null;
+		try {
+			fileReader = new FileReader("D:\\map.txt");
+			bufferedReader = new BufferedReader(fileReader);
+			String line = null;
+			int row = Constant.ZERO;
+	        while((line = bufferedReader.readLine()) != null) {
+	            String[] rowPoints = line.split(Constant.MAP_CHARACTER_SPLIT); 
+	            for (int col = 0; col < rowPoints.length; col++) {
+	            	map[row][col] = Integer.parseInt(rowPoints[col]);
+	            }
+	            row++;
+	        }
+		} catch(Exception e) {
+			e.printStackTrace();
+		} finally {
+			bufferedReader.close();
+			fileReader.close();
+		}
+		return map;
+	}
+	
 	private List<PathModel> getHighestTenPoints(int[][] map) {
 		List<PathModel> highestTenPoints = new ArrayList<>();
 		PathModel pathModel = null;
 		int highestPoint = gbHighestPoint;
 		if (map.length == gbRowDimension) {
-			while (highestTenPoints.size() <= Constant.TEN) {
+			while (highestTenPoints.size() <= Constant.ROW_DIMENSION) {
 				for (int row = 0; row < map.length; row++) {
 					if (map[row].length == gbColDimension) {
 						for (int col = 0; col < map[row].length; col++) {
@@ -88,10 +111,21 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 			
 			Collections.sort(gbPossiblePaths, new Comparator<List<PathModel>>() {
 				@Override
-				public int compare(List<PathModel> list1, List<PathModel> list2) {
-					Integer size1 = list1.size();
-					Integer size2 = list2.size();
-					return size2.compareTo(size1);
+				public int compare(List<PathModel> l1, List<PathModel> l2) {
+					Integer s1 = l1.size();
+					Integer s2 = l2.size();
+					Integer sr = s2.compareTo(s1);
+					if (sr == Constant.ZERO) {
+						for (int i = 0; i < l1.size(); i++) {
+							Integer d1 = l1.get(i).getData();
+							Integer d2 = l2.get(i).getData();
+							Integer dr = d2.compareTo(d1);
+							if (dr != Constant.ZERO) {
+								return dr;
+							}
+						}
+					}
+					return sr;
 				}
 			});
 			
@@ -120,51 +154,43 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 			
 			int pathVerticalDrop = Constant.ZERO;
 			int skiModelVerticalDrop = Constant.ZERO;
-			
-			if (null == path.getPath()) {
-				path.setPath(skiModel.getPath());
-			} else {
-				for (int i = 0; i < path.getPath().size(); i++) {
-					if ((i+1) < path.getPath().size()) {
-						if (path.getAxis().get(i).equals(Constant.VERTICAL_AXIS) && path.getAxis().get(i+1).equals(Constant.VERTICAL_AXIS)) {
-							pathVerticalDrop++;
-						}
-					}
-				}
-			}
-			
-			if (null == path.getAxis()) {
-				path.setAxis(skiModel.getAxis());
-			} else {
-				for (int i = 0; i < skiModel.getPath().size(); i++) {
-					if ((i+1) < skiModel.getPath().size()) {
-						if (skiModel.getAxis().get(i).equals(Constant.VERTICAL_AXIS) && skiModel.getAxis().get(i+1).equals(Constant.VERTICAL_AXIS)) {
-							skiModelVerticalDrop++;
-						}
-					}
-				}
-			}
 
-			if (null != path.getPath() && null != path.getAxis()) {
-				if (skiModelVerticalDrop > pathVerticalDrop) {
-					path.setAxis(skiModel.getAxis());
-					path.setPath(skiModel.getPath());
-				}
-			}
-
-			if (null == path.getLengthPath()) {
+			if (null == path.getLengthPath() && null == path.getLengthPath() && null == path.getLengthPath() && null == path.getLengthPath()) {
 				path.setLengthPath(skiModel.getLengthPath());
+				path.setAxis(skiModel.getAxis());
+				path.setPath(skiModel.getPath());
+				path.setDropPath(skiModel.getDropPath());
 			} else {
 				if (skiModel.getLengthPath() > path.getLengthPath()) {
 					path.setLengthPath(skiModel.getLengthPath());
-				}
-			}
-			
-			if (null == path.getDropPath()) {
-				path.setDropPath(skiModel.getDropPath());
-			} else {
-				if (skiModel.getDropPath() > path.getDropPath()) {
+					path.setAxis(skiModel.getAxis());
+					path.setPath(skiModel.getPath());
 					path.setDropPath(skiModel.getDropPath());
+				} else if (skiModel.getLengthPath() == path.getLengthPath()) {
+					for (int i = 0; i < path.getPath().size(); i++) {
+						if ((i+1) < path.getPath().size()) {
+							if (path.getPath().get(i).equals(Constant.VERTICAL_AXIS) && path.getPath().get(i+1).equals(Constant.VERTICAL_AXIS)) {
+								pathVerticalDrop++;
+							}
+						}
+					}
+					
+					for (int i = 0; i < skiModel.getPath().size(); i++) {
+						if ((i+1) < skiModel.getPath().size()) {
+							if (skiModel.getPath().get(i).equals(Constant.VERTICAL_AXIS) && skiModel.getPath().get(i+1).equals(Constant.VERTICAL_AXIS)) {
+								skiModelVerticalDrop++;
+							}
+						}
+					}
+					
+					if (skiModelVerticalDrop > pathVerticalDrop) {
+						path.setAxis(skiModel.getAxis());
+						path.setPath(skiModel.getPath());
+					}
+					
+					if (skiModel.getDropPath() > path.getDropPath()) {
+						path.setDropPath(skiModel.getDropPath());
+					}
 				}
 			}
 		}

@@ -1,5 +1,7 @@
 package com.easesolutions.controller.api;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,6 +15,7 @@ import com.easesolutions.exception.CustomException;
 import com.easesolutions.model.ResponseModel;
 import com.easesolutions.model.SkiModel;
 import com.easesolutions.service.SkiCalculationService;
+import com.easesolutions.util.Constant;
 
 @Controller
 public class APIController {
@@ -22,14 +25,14 @@ public class APIController {
 
 	@RequestMapping(value="/ski-calculation", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseModel<SkiModel> skiCalculation(HttpServletRequest request) {
+	public ResponseModel<SkiModel> skiCalculation(HttpServletRequest request) throws IOException {
 		ResponseModel<SkiModel> responseModel = new ResponseModel<>();
 		int statusCode = HttpServletResponse.SC_OK;
 		String messageCode = "Success";
 		SkiModel skiModel = null;
 		
 		try {
-			skiModel = skiCalculationService.getCalculation(0, 10, 4, 4);
+			skiModel = skiCalculationService.getCalculation(Constant.LOWEST_POINT, Constant.HIGHEST_POINT, Constant.ROW_DIMENSION, Constant.COL_DIMENSION);
 		} catch (CustomException e) {
 			statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 			messageCode = "ERROR";
