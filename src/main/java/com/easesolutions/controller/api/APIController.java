@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.easesolutions.exception.CustomException;
 import com.easesolutions.model.ResponseModel;
 import com.easesolutions.model.SkiModel;
 import com.easesolutions.service.SkiCalculationService;
@@ -28,14 +27,14 @@ public class APIController {
 	public ResponseModel<SkiModel> skiCalculation(HttpServletRequest request) throws IOException {
 		ResponseModel<SkiModel> responseModel = new ResponseModel<>();
 		int statusCode = HttpServletResponse.SC_OK;
-		String messageCode = "Success";
+		String messageCode = Constant.SUCCESS;
 		SkiModel skiModel = null;
 		
 		try {
-			skiModel = skiCalculationService.getCalculation(Constant.LOWEST_POINT, Constant.HIGHEST_POINT, Constant.ROW_DIMENSION, Constant.COL_DIMENSION);
-		} catch (CustomException e) {
+			skiModel = skiCalculationService.getCalculation(request.getParameter("filepath"), Constant.LOWEST_POINT, Constant.HIGHEST_POINT, Constant.ROW_DIMENSION, Constant.COL_DIMENSION);
+		} catch (Exception e) {
 			statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-			messageCode = "ERROR";
+			messageCode = Constant.ERROR;
 			skiModel = null;
 		}
 		

@@ -26,14 +26,13 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	private int gbColDimension;
 
 	@Override
-	public SkiModel getCalculation(int lowestPoint, int highestPoint, int rowDimension, int colDimension) throws IOException {
-		
+	public SkiModel getCalculation(String filepath, int lowestPoint, int highestPoint, int rowDimension, int colDimension) throws IOException {
 		gbLowestPoint = lowestPoint;
 		gbHighestPoint = highestPoint;
 		gbRowDimension = rowDimension;
 		gbColDimension = colDimension;
 		
-		int[][] map = getMap();
+		int[][] map = getMap(filepath);
 		
 		List<PathModel> highestTenPoints = getHighestTenPoints(map);
 		
@@ -44,12 +43,12 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		return skiModel;
 	}
 	
-	private int[][] getMap() throws IOException {
+	private int[][] getMap(String filepath) throws IOException {
 		int[][] map = new int[gbRowDimension][gbColDimension];
 		FileReader fileReader = null;
 		BufferedReader bufferedReader = null;
 		try {
-			fileReader = new FileReader("D:\\map.txt");
+			fileReader = new FileReader(filepath);
 			bufferedReader = new BufferedReader(fileReader);
 			String line = null;
 			int row = Constant.ZERO;
@@ -63,7 +62,7 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	        	row++;
 	        }
 		} catch(Exception e) {
-			e.printStackTrace();
+			throw e;
 		} finally {
 			bufferedReader.close();
 			fileReader.close();
