@@ -54,11 +54,13 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 			String line = null;
 			int row = Constant.ZERO;
 	        while((line = bufferedReader.readLine()) != null) {
-	            String[] rowPoints = line.split(Constant.MAP_CHARACTER_SPLIT); 
-	            for (int col = 0; col < rowPoints.length; col++) {
-	            	map[row][col] = Integer.parseInt(rowPoints[col]);
-	            }
-	            row++;
+	        	if (row > Constant.ZERO) {
+		            String[] rowPoints = line.split(Constant.MAP_CHARACTER_SPLIT); 
+		            for (int col = 0; col < rowPoints.length; col++) {
+		            	map[row-1][col] = Integer.parseInt(rowPoints[col]);
+		            }
+	        	}
+	        	row++;
 	        }
 		} catch(Exception e) {
 			e.printStackTrace();
