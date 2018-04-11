@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.easesolutions.exception.CustomException;
 import com.easesolutions.model.ResponseModel;
 import com.easesolutions.model.SkiModel;
 import com.easesolutions.service.SkiCalculationService;
@@ -33,9 +34,9 @@ public class APIController {
 		
 		try {
 			skiModel = skiCalculationService.getCalculation(file, lowestPoint, highestPoint);
-		} catch (Exception e) {
-			statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-			messageCode = Constant.ERROR;
+		} catch (CustomException e) {
+			statusCode = e.getErrorCode();
+			messageCode = e.getErrorMessage();
 			skiModel = null;
 		}
 		

@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.easesolutions.exception.CustomException;
 import com.easesolutions.model.PathModel;
 import com.easesolutions.model.SkiModel;
 import com.easesolutions.model.TreeNode;
@@ -46,27 +47,49 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		int[][] map = null;
 		BufferedReader bufferedReader = null;
 		try {
+			String[] fileFrags = file.getOriginalFilename().split("\\.");
+			String extension = fileFrags[fileFrags.length-1];
+			if (!extension.equals("txt")) {
+				throw new CustomException("The file should be a text document (txt).");
+			}
 			bufferedReader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"));
 			String line = null;
 			int row = Constant.ZERO;
 	        while((line = bufferedReader.readLine()) != null) {
 	        	if (row == Constant.ZERO) {
 	        		String[] dimensions = line.split(Constant.MAP_CHARACTER_SPLIT);
+	        		if (dimensions.length > 2) {
+	        			throw new CustomException("First row data should be two numbers with space delimiter.");
+	        		}
 	        		gbRowDimension = Integer.parseInt(dimensions[0]);
 	        		gbColDimension = Integer.parseInt(dimensions[1]);
+	        		if (gbRowDimension < Constant.ZERO || gbColDimension < Constant.ZERO) {
+	        			throw new CustomException("Dimensions should be greater than or equal to zero.");
+	        		}
 	        		map = new int[gbRowDimension][gbColDimension];
 	        	} else {
 	        		String[] rowPoints = line.split(Constant.MAP_CHARACTER_SPLIT);
+	        		if (rowPoints.length > gbColDimension || rowPoints.length < gbColDimension) {
+	        			throw new CustomException("Row " + (row-1) + " - column dimension should be " + gbColDimension + ".");
+	        		}
 		            for (int col = 0; col < rowPoints.length; col++) {
-		            	map[row-1][col] = Integer.parseInt(rowPoints[col]);
+		            	if (Integer.parseInt(rowPoints[col]) >= gbLowestPoint && Integer.parseInt(rowPoints[col]) <= gbHighestPoint) {
+		            		map[row-1][col] = Integer.parseInt(rowPoints[col]);
+		            	} else {
+		            		throw new CustomException("Numbers on the map should between " + gbLowestPoint + " and " + gbHighestPoint + ".");
+		            	}
 		            }
 	        	}
 	        	row++;
 	        }
+        	if ((row-1) > gbRowDimension || (row-1) < gbRowDimension) {
+    			throw new CustomException("Row dimension should be " + gbRowDimension + ".");
+    		}
+        	bufferedReader.close();
+		} catch(NumberFormatException e) {
+			throw new CustomException("NumberFormatException : Dimensions should be a number.");
 		} catch(Exception e) {
-			throw e;
-		} finally {
-			bufferedReader.close();
+			throw new CustomException("Exception : " + e.getMessage());
 		}
 		return map;
 	}
@@ -75,27 +98,19 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		List<PathModel> highestTenPoints = new ArrayList<>();
 		PathModel pathModel = null;
 		int highestPoint = gbHighestPoint;
-		if (map.length == gbRowDimension) {
-			while (highestTenPoints.size() <= gbRowDimension) {
-				for (int row = 0; row < map.length; row++) {
-					if (map[row].length == gbColDimension) {
-						for (int col = 0; col < map[row].length; col++) {
-							if (highestPoint == map[row][col]) {
-								pathModel = new PathModel();
-								pathModel.setData(map[row][col]);
-								pathModel.setRow(row);
-								pathModel.setCol(col);
-								highestTenPoints.add(pathModel);
-							}
-						}
-					} else {
-						// throw exception
+		while (highestTenPoints.size() <= gbRowDimension) {
+			for (int row = 0; row < map.length; row++) {
+				for (int col = 0; col < map[row].length; col++) {
+					if (highestPoint == map[row][col]) {
+						pathModel = new PathModel();
+						pathModel.setData(map[row][col]);
+						pathModel.setRow(row);
+						pathModel.setCol(col);
+						highestTenPoints.add(pathModel);
 					}
 				}
-				highestPoint--;
 			}
-		} else {
-			// throw exception
+			highestPoint--;
 		}
 		return highestTenPoints;
 	}

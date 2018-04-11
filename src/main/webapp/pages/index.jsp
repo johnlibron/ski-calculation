@@ -12,7 +12,7 @@
 		<form action="${pageContext.request.contextPath}/api/ski-calculation" method="post" enctype="multipart/form-data" id="mySkiForm">
 			<h1>Kitzbühel Ski Resort</h1>
 			Map file: <input type="file" name="file" accept=".txt" required /><br><br>
-			Numbers on map are between <input type="text" size="5" name="lowestPoint" required /> and <input type="text" size="5" name="highestPoint" required /><br><br>
+			Numbers on the map are between <input type="text" size="5" name="lowestPoint" required /> and <input type="text" size="5" name="highestPoint" required /><br><br>
 			Length of calculated path: <span id="lengthPath"></span><br>
 			Drop of calculated path: <span id="dropPath"></span><br>
 			Calculated path: <span id="path"></span><br>
@@ -53,6 +53,10 @@
 					});
 					$("#axis").text(axis.substring(0, axis.length-2) + " ]");
 				} else {
+					$("#lengthPath").text("");
+					$("#dropPath").text("");
+					$("#path").text("");
+					$("#axis").text("");
 					$("#errorMessage").text(response.messageCode);
 				}
 			});
