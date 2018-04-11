@@ -1,14 +1,15 @@
 package com.easesolutions.service.impl;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.easesolutions.model.PathModel;
 import com.easesolutions.model.SkiModel;
@@ -26,11 +27,11 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	private int gbColDimension;
 
 	@Override
-	public SkiModel getCalculation(String filepath, int lowestPoint, int highestPoint) throws IOException {
+	public SkiModel getCalculation(MultipartFile file, int lowestPoint, int highestPoint) throws IOException {
 		gbLowestPoint = lowestPoint;
 		gbHighestPoint = highestPoint;
 		
-		int[][] map = getMap(filepath);
+		int[][] map = getMap(file);
 		
 		List<PathModel> highestTenPoints = getHighestPoints(map);
 		
@@ -41,13 +42,11 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		return skiModel;
 	}
 	
-	private int[][] getMap(String filepath) throws IOException {
+	private int[][] getMap(MultipartFile file) throws IOException {
 		int[][] map = null;
-		FileReader fileReader = null;
 		BufferedReader bufferedReader = null;
 		try {
-			fileReader = new FileReader(filepath);
-			bufferedReader = new BufferedReader(fileReader);
+			bufferedReader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"));
 			String line = null;
 			int row = Constant.ZERO;
 	        while((line = bufferedReader.readLine()) != null) {
@@ -68,7 +67,6 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 			throw e;
 		} finally {
 			bufferedReader.close();
-			fileReader.close();
 		}
 		return map;
 	}

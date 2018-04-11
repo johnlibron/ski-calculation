@@ -2,14 +2,15 @@ package com.easesolutions.controller.api;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.easesolutions.model.ResponseModel;
 import com.easesolutions.model.SkiModel;
@@ -22,18 +23,16 @@ public class APIController {
 	@Autowired
 	SkiCalculationService skiCalculationService;
 
-	@RequestMapping(value="/ski-calculation", method=RequestMethod.GET)
+	@RequestMapping(value="/ski-calculation", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseModel<SkiModel> skiCalculation(HttpServletRequest request) throws IOException {
+	public ResponseModel<SkiModel> skiCalculation(@RequestParam("file") MultipartFile file, @RequestParam("lowestPoint") int lowestPoint, @RequestParam("highestPoint") int highestPoint) throws IOException {
 		ResponseModel<SkiModel> responseModel = new ResponseModel<>();
 		int statusCode = HttpServletResponse.SC_OK;
 		String messageCode = Constant.SUCCESS;
 		SkiModel skiModel = null;
 		
 		try {
-			int lowestPoint = Integer.parseInt(request.getParameter("lowestPoint"));
-			int highestPoint = Integer.parseInt(request.getParameter("highestPoint"));
-			skiModel = skiCalculationService.getCalculation(request.getParameter("filepath"), lowestPoint, highestPoint);
+			skiModel = skiCalculationService.getCalculation(file, lowestPoint, highestPoint);
 		} catch (Exception e) {
 			statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 			messageCode = Constant.ERROR;
@@ -45,5 +44,4 @@ public class APIController {
 		responseModel.setStatusCode(statusCode);
 		return responseModel;
 	}
-	
 }
