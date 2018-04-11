@@ -7,10 +7,6 @@ public class Constant {
 	public static final String HORIZONTAL_AXIS = "X";
 	public static final String VERTICAL_AXIS = "Y";
 	public static final String MAP_CHARACTER_SPLIT = " ";
-	public static final int LOWEST_POINT = 0;
-	public static final int HIGHEST_POINT = 1500;
-	public static final int ROW_DIMENSION = 1000;
-	public static final int COL_DIMENSION = 1000;
 	public static final class POSITION {
 		public static final int NORTH = 1;
 		public static final int SOUTH = 2;

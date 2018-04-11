@@ -1,14 +1,15 @@
 package com.easesolutions.service.impl;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.easesolutions.model.PathModel;
 import com.easesolutions.model.SkiModel;
@@ -26,15 +27,13 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	private int gbColDimension;
 
 	@Override
-	public SkiModel getCalculation(String filepath, int lowestPoint, int highestPoint, int rowDimension, int colDimension) throws IOException {
+	public SkiModel getCalculation(MultipartFile file, int lowestPoint, int highestPoint) throws IOException {
 		gbLowestPoint = lowestPoint;
 		gbHighestPoint = highestPoint;
-		gbRowDimension = rowDimension;
-		gbColDimension = colDimension;
 		
-		int[][] map = getMap(filepath);
+		int[][] map = getMap(file);
 		
-		List<PathModel> highestTenPoints = getHighestTenPoints(map);
+		List<PathModel> highestTenPoints = getHighestPoints(map);
 		
 		List<SkiModel> possiblePaths = getPossiblePaths(map, highestTenPoints);
 
@@ -43,18 +42,21 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		return skiModel;
 	}
 	
-	private int[][] getMap(String filepath) throws IOException {
-		int[][] map = new int[gbRowDimension][gbColDimension];
-		FileReader fileReader = null;
+	private int[][] getMap(MultipartFile file) throws IOException {
+		int[][] map = null;
 		BufferedReader bufferedReader = null;
 		try {
-			fileReader = new FileReader(filepath);
-			bufferedReader = new BufferedReader(fileReader);
+			bufferedReader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"));
 			String line = null;
 			int row = Constant.ZERO;
 	        while((line = bufferedReader.readLine()) != null) {
-	        	if (row > Constant.ZERO) {
-		            String[] rowPoints = line.split(Constant.MAP_CHARACTER_SPLIT); 
+	        	if (row == Constant.ZERO) {
+	        		String[] dimensions = line.split(Constant.MAP_CHARACTER_SPLIT);
+	        		gbRowDimension = Integer.parseInt(dimensions[0]);
+	        		gbColDimension = Integer.parseInt(dimensions[1]);
+	        		map = new int[gbRowDimension][gbColDimension];
+	        	} else {
+	        		String[] rowPoints = line.split(Constant.MAP_CHARACTER_SPLIT);
 		            for (int col = 0; col < rowPoints.length; col++) {
 		            	map[row-1][col] = Integer.parseInt(rowPoints[col]);
 		            }
@@ -65,17 +67,16 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 			throw e;
 		} finally {
 			bufferedReader.close();
-			fileReader.close();
 		}
 		return map;
 	}
 	
-	private List<PathModel> getHighestTenPoints(int[][] map) {
+	private List<PathModel> getHighestPoints(int[][] map) {
 		List<PathModel> highestTenPoints = new ArrayList<>();
 		PathModel pathModel = null;
 		int highestPoint = gbHighestPoint;
 		if (map.length == gbRowDimension) {
-			while (highestTenPoints.size() <= Constant.ROW_DIMENSION) {
+			while (highestTenPoints.size() <= gbRowDimension) {
 				for (int row = 0; row < map.length; row++) {
 					if (map[row].length == gbColDimension) {
 						for (int col = 0; col < map[row].length; col++) {
