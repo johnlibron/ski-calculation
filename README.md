@@ -1,5 +1,5 @@
-Let’s say you hopped on a flight to the Kitzbühel ski resort in Austria. Being a software engineer you
-can’t help but value efficiency, so naturally you want to ski as long as possible and as fast as possible
+LetÂ’s say you hopped on a flight to the KitzbÃ¼hel ski resort in Austria. Being a software engineer you
+canÂ’t help but value efficiency, so naturally you want to ski as long as possible and as fast as possible
 without having to ride back up on the ski lift. So you take a look at the map of the mountain and try
 to find the longest ski run down.
 
@@ -8,13 +8,9 @@ In digital form the map looks like the number grid below.
 
 
 4 4
-
 4 8 7 3
-
 2 5 9 3
-
 6 3 2 5
-
 4 4 1 6
 
 
@@ -27,17 +23,13 @@ paths down of the same length, you want to take the one with the steepest vertic
 largest difference between your starting elevation and your ending elevation.
 
 
-On this particular map, the longest path down is of length=5 and it’s highlighted in bold below: 9-5-3-2-1.
+On this particular map, the longest path down is of length=5 and itÂ’s highlighted in bold below: 9-5-3-2-1.
 
 
 4 4
-
 4 8 7 3
-
 2 5 9 3
-
 6 3 2 5
-
 4 4 1 6
 
 
