@@ -31,7 +31,9 @@ public class APIController {
 		SkiModel skiModel = null;
 		
 		try {
-			skiModel = skiCalculationService.getCalculation(request.getParameter("filepath"), Constant.LOWEST_POINT, Constant.HIGHEST_POINT, Constant.ROW_DIMENSION, Constant.COL_DIMENSION);
+			int lowestPoint = Integer.parseInt(request.getParameter("lowestPoint"));
+			int highestPoint = Integer.parseInt(request.getParameter("highestPoint"));
+			skiModel = skiCalculationService.getCalculation(request.getParameter("filepath"), lowestPoint, highestPoint);
 		} catch (Exception e) {
 			statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 			messageCode = Constant.ERROR;

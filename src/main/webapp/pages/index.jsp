@@ -9,8 +9,9 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<head>
 	<body>
-		<h2>Kitzbühel Ski Resort</h2>
+		<h1>Kitzbühel Ski Resort</h1>
 		Map file path: <input type="text" id="filepath"><br><br>
+		Numbers on map are between <input type="text" size="5" id="lowestPoint" /> and <input type="text" size="5" id="highestPoint" /><br><br>
 		Length of calculated path: <span id="lengthPath"></span><br>
 		Drop of calculated path: <span id="dropPath"></span><br>
 		Calculated path: <span id="path"></span><br>
@@ -26,7 +27,9 @@
 					url: "${pageContext.request.contextPath}/api/ski-calculation",
 					type: "GET",
 					data: {
-						filepath: $("#filepath").val()
+						filepath: $("#filepath").val(),
+						lowestPoint: $("#lowestPoint").val(),
+						highestPoint: $("#highestPoint").val()
 					}
 				}).done(function(response) {
 					if (null != response.data && response.statusCode == 200) {

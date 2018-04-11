@@ -26,15 +26,13 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	private int gbColDimension;
 
 	@Override
-	public SkiModel getCalculation(String filepath, int lowestPoint, int highestPoint, int rowDimension, int colDimension) throws IOException {
+	public SkiModel getCalculation(String filepath, int lowestPoint, int highestPoint) throws IOException {
 		gbLowestPoint = lowestPoint;
 		gbHighestPoint = highestPoint;
-		gbRowDimension = rowDimension;
-		gbColDimension = colDimension;
 		
 		int[][] map = getMap(filepath);
 		
-		List<PathModel> highestTenPoints = getHighestTenPoints(map);
+		List<PathModel> highestTenPoints = getHighestPoints(map);
 		
 		List<SkiModel> possiblePaths = getPossiblePaths(map, highestTenPoints);
 
@@ -44,7 +42,7 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 	}
 	
 	private int[][] getMap(String filepath) throws IOException {
-		int[][] map = new int[gbRowDimension][gbColDimension];
+		int[][] map = null;
 		FileReader fileReader = null;
 		BufferedReader bufferedReader = null;
 		try {
@@ -53,8 +51,13 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 			String line = null;
 			int row = Constant.ZERO;
 	        while((line = bufferedReader.readLine()) != null) {
-	        	if (row > Constant.ZERO) {
-		            String[] rowPoints = line.split(Constant.MAP_CHARACTER_SPLIT); 
+	        	if (row == Constant.ZERO) {
+	        		String[] dimensions = line.split(Constant.MAP_CHARACTER_SPLIT);
+	        		gbRowDimension = Integer.parseInt(dimensions[0]);
+	        		gbColDimension = Integer.parseInt(dimensions[1]);
+	        		map = new int[gbRowDimension][gbColDimension];
+	        	} else {
+	        		String[] rowPoints = line.split(Constant.MAP_CHARACTER_SPLIT);
 		            for (int col = 0; col < rowPoints.length; col++) {
 		            	map[row-1][col] = Integer.parseInt(rowPoints[col]);
 		            }
@@ -70,12 +73,12 @@ public class SkiCalculationServiceImpl implements SkiCalculationService {
 		return map;
 	}
 	
-	private List<PathModel> getHighestTenPoints(int[][] map) {
+	private List<PathModel> getHighestPoints(int[][] map) {
 		List<PathModel> highestTenPoints = new ArrayList<>();
 		PathModel pathModel = null;
 		int highestPoint = gbHighestPoint;
 		if (map.length == gbRowDimension) {
-			while (highestTenPoints.size() <= Constant.ROW_DIMENSION) {
+			while (highestTenPoints.size() <= gbRowDimension) {
 				for (int row = 0; row < map.length; row++) {
 					if (map[row].length == gbColDimension) {
 						for (int col = 0; col < map[row].length; col++) {
