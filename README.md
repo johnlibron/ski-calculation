@@ -1,5 +1,5 @@
-Lets say you hopped on a flight to the Kitzbühel ski resort in Austria. Being a software engineer you
-cant help but value efficiency, so naturally you want to ski as long as possible and as fast as possible
+Lets say you hopped on a flight to the Kitzbühel ski resort in Austria. Being a software engineer you
+cant help but value efficiency, so naturally you want to ski as long as possible and as fast as possible
 without having to ride back up on the ski lift. So you take a look at the map of the mountain and try
 to find the longest ski run down.
 
@@ -7,11 +7,11 @@ to find the longest ski run down.
 In digital form the map looks like the number grid below.
 
 
-   4 4
-   4 8 7 3
-   2 5 9 3
-   6 3 2 5
-   4 4 1 6
+*   4 4
+*   4 8 7 3
+*   2 5 9 3
+*   6 3 2 5
+*   4 4 1 6
 
 
 The first line (4 4) indicates that this is a 4x4 map. Each number represents the elevation of that area
@@ -26,11 +26,11 @@ largest difference between your starting elevation and your ending elevation.
 On this particular map, the longest path down is of length=5 and its highlighted in bold below: 9-5-3-2-1.
 
 
-   4 4
-   4 8 7 3
-   2 5 9 3
-   6 3 2 5
-   4 4 1 6
+*   4 4
+*   4 8 7 3
+*   2 5 9 3
+*   6 3 2 5
+*   4 4 1 6
 
 
 There is another path that is also length five: 8-5-3-2-1. However, the tie is broken by the first path
